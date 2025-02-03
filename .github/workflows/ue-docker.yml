@@ -5,6 +5,12 @@ on: push
 jobs:
   build:
     runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        unreal: ['4.27', '5.3']
+
     steps:
       - name: Run Docker stuff
         run: |

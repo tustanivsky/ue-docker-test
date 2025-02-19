@@ -72,8 +72,13 @@ jobs:
           Write-Host "Cleaning package caches..."
           Remove-Item -Path "C:\ProgramData\Package Cache\*" -Recurse -Force -ErrorAction SilentlyContinue
 
+          # 1. GHCUP - Haskell compiler and tools (~12GB)
+          Write-Host "Removing Haskell compiler and tools..."
+          Remove-Item -Path "C:\ghcup" -Recurse -Force -ErrorAction SilentlyContinue
+
           # REMOVE ANDROID SDK (very large)
           Write-Host "Removing Android SDK..."
+          Remove-Item -Path "C:\Program Files\Android" -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item -Path "C:\Program Files (x86)\Android" -Recurse -Force -ErrorAction SilentlyContinue
 
           # REMOVE OLDER NODE.JS VERSIONS AND MODULES
@@ -101,6 +106,18 @@ jobs:
           Remove-Item -Path "C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit" -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item -Path "C:\Program Files (x86)\Windows Kits\10\Microsoft Application Inspector" -Recurse -Force -ErrorAction SilentlyContinue
 
+          # 4. Remove R Tools (~2.8GB)
+          Write-Host "Removing R Tools..."
+          Remove-Item -Path "C:\rtools44" -Recurse -Force -ErrorAction SilentlyContinue
+
+          # 6. Remove Julia (~0.68GB)
+          Write-Host "Removing Julia..."
+          Remove-Item -Path "C:\Julia" -Recurse -Force -ErrorAction SilentlyContinue
+          
+          # 7. Remove Miniconda (~0.71GB)
+          Write-Host "Removing Miniconda..."
+          Remove-Item -Path "C:\Miniconda" -Recurse -Force -ErrorAction SilentlyContinue
+
           # REMOVE OLDER .NET CORE SDKS (KEEP ONLY LATEST)
           Write-Host "Removing older .NET Core SDKs..."
           $dotnetPath = "C:\Program Files\dotnet\sdk"
@@ -112,6 +129,12 @@ jobs:
                       Remove-Item -Path $_.FullName -Recurse -Force
                   }
               }
+          }
+
+          # Check if Docker is installed and prune unused components
+          if (Get-Command "docker" -ErrorAction SilentlyContinue) {
+            Write-Host "Pruning Docker system..."
+            docker system prune -a -f
           }
                     
           # Check final space

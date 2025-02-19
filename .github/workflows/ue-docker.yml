@@ -71,7 +71,57 @@ jobs:
           # Clean package caches
           Write-Host "Cleaning package caches..."
           Remove-Item -Path "C:\ProgramData\Package Cache\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+          # REMOVE ANDROID SDK (very large)
+          Write-Host "Removing Android SDK..."
+          Remove-Item -Path "C:\Program Files (x86)\Android" -Recurse -Force -ErrorAction SilentlyContinue
+
+          # REMOVE UNUSED VISUAL C++ REDISTRIBUTABLES
+          Write-Host "Removing older Visual C++ Redistributables..."
+          Get-WmiObject -Class Win32_Product | Where-Object { 
+              $_.Name -like "*Visual C++ 2013*" -or 
+              $_.Name -like "*Visual C++ 2010*" -or
+              $_.Name -like "*Visual C++ 2012*"
+          } | ForEach-Object { $_.Uninstall() }
+
+          # REMOVE OLDER NODE.JS VERSIONS AND MODULES
+          Write-Host "Cleaning Node.js versions..."
+          Remove-Item -Path "C:\Program Files\nodejs\node_modules" -Recurse -Force -ErrorAction SilentlyContinue
           
+          # REMOVE MONGODB (very large)
+          Write-Host "Removing MongoDB..."
+          Remove-Item -Path "C:\Program Files\MongoDB" -Recurse -Force -ErrorAction SilentlyContinue
+          
+          # REMOVE MYSQL (very large)
+          Write-Host "Removing MySQL..."
+          Remove-Item -Path "C:\Program Files\MySQL" -Recurse -Force -ErrorAction SilentlyContinue
+          
+          # REMOVE POSTGRESQL (very large)
+          Write-Host "Removing PostgreSQL..."
+          Remove-Item -Path "C:\Program Files\PostgreSQL" -Recurse -Force -ErrorAction SilentlyContinue
+          
+          # REMOVE CHOCOLATEY CACHE
+          Write-Host "Cleaning Chocolatey cache..."
+          Remove-Item -Path "C:\Users\runneradmin\AppData\Local\Temp\chocolatey" -Recurse -Force -ErrorAction SilentlyContinue
+
+          # REMOVE UNUSED WINDOWS KITS COMPONENTS
+          Write-Host "Removing unused Windows Kits components..."
+          Remove-Item -Path "C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "C:\Program Files (x86)\Windows Kits\10\Microsoft Application Inspector" -Recurse -Force -ErrorAction SilentlyContinue
+
+          # REMOVE OLDER .NET CORE SDKS (KEEP ONLY LATEST)
+          Write-Host "Removing older .NET Core SDKs..."
+          $dotnetPath = "C:\Program Files\dotnet\sdk"
+          if (Test-Path $dotnetPath) {
+              $allSdks = Get-ChildItem -Path $dotnetPath -Directory | Sort-Object Name -Descending
+              if ($allSdks.Count -gt 1) {
+                  # Keep the latest SDK, remove others
+                  $allSdks | Select-Object -Skip 1 | ForEach-Object {
+                      Remove-Item -Path $_.FullName -Recurse -Force
+                  }
+              }
+          }
+                    
           # Check final space
           $finalSpace = (Get-PSDrive C).Free / 1GB
           $gainedSpace = $finalSpace - $initialSpace

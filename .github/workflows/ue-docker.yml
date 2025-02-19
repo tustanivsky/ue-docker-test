@@ -76,14 +76,6 @@ jobs:
           Write-Host "Removing Android SDK..."
           Remove-Item -Path "C:\Program Files (x86)\Android" -Recurse -Force -ErrorAction SilentlyContinue
 
-          # REMOVE UNUSED VISUAL C++ REDISTRIBUTABLES
-          Write-Host "Removing older Visual C++ Redistributables..."
-          Get-WmiObject -Class Win32_Product | Where-Object { 
-              $_.Name -like "*Visual C++ 2013*" -or 
-              $_.Name -like "*Visual C++ 2010*" -or
-              $_.Name -like "*Visual C++ 2012*"
-          } | ForEach-Object { $_.Uninstall() }
-
           # REMOVE OLDER NODE.JS VERSIONS AND MODULES
           Write-Host "Cleaning Node.js versions..."
           Remove-Item -Path "C:\Program Files\nodejs\node_modules" -Recurse -Force -ErrorAction SilentlyContinue

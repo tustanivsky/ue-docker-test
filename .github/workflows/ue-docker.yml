@@ -6,10 +6,10 @@ jobs:
   build:
     runs-on: windows-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        unreal: ['4.27', '5.3']
+    # strategy:
+    #   fail-fast: false
+    #   matrix:
+    #     unreal: ['4.27', '5.3']
 
     steps:
       - name: Run Docker stuff
@@ -17,20 +17,6 @@ jobs:
           # Check initial space
           $initialSpace = (Get-PSDrive C).Free / 1GB
           Write-Host "Initial free space: $initialSpace GB"
-
-          # List top 10 directories by size to help identify targets
-          Write-Host "Scanning largest directories..."
-          $startTime = Get-Date
-          $largestDirs = Get-ChildItem -Path "C:\" -Directory | 
-            Where-Object { $_.FullName -notlike "C:\Windows\WinSxS*" } |
-            ForEach-Object {
-              $size = (Get-ChildItem $_.FullName -Recurse -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum / 1GB
-              [PSCustomObject]@{
-                Directory = $_.FullName
-                "Size(GB)" = [math]::Round($size, 2)
-              }
-            } | Sort-Object "Size(GB)" -Descending | Select-Object -First 10
-          $largestDirs | Format-Table
 
           # Clear Windows Update
           Write-Host "Cleaning Windows Update cache..."
@@ -53,6 +39,8 @@ jobs:
           # Windows component cleanup
           Write-Host "Cleaning Windows component store..."
           Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase
+
+          Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\Catalogs" -Recurse | Remove-Item -Force -ErrorAction SilentlyContinue
           
           # Remove Windows.old and update folders
           Write-Host "Removing Windows update backup folders..."
@@ -63,8 +51,7 @@ jobs:
           # Clear symbol cache
           Write-Host "Clearing symbol cache..."
           Remove-Item -Path "C:\Windows\symbols\*" -Recurse -Force -ErrorAction SilentlyContinue
-          
-                    
+
           # Clean temp files
           Write-Host "Cleaning temp files..."
           Remove-Item -Path "C:\Windows\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue

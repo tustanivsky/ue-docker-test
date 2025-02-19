@@ -14,11 +14,40 @@ jobs:
     steps:
       - name: Run Docker stuff
         run: |
-          echo ${{ secrets.DOCKER_TOKEN }} | docker login ghcr.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          git clone https://github.com/getsentry/sentry-unreal.git
-          wget "https://github.com/getsentry/sentry-unreal/releases/download/0.22.0/sentry-unreal-0.22.0-engine${{ matrix.unreal }}-github.zip" -OutFile "sentry.zip"
-          Expand-Archive -Path "sentry.zip" -DestinationPath "sentry-unreal/sample/Plugins" -Force
-          ls -al
+          # Check initial space
+          $initialSpace = (Get-PSDrive C).Free / 1GB
+          Write-Host "Initial free space: $initialSpace GB"
+          
+          # Windows component cleanup
+          Write-Host "Cleaning Windows component store..."
+          Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase
+          
+          # Remove Windows.old and update folders
+          Write-Host "Removing Windows update backup folders..."
+          Remove-Item -Path "C:\Windows.old" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "C:\`$WINDOWS.~BT" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "C:\`$WINDOWS.~WS" -Recurse -Force -ErrorAction SilentlyContinue
+          
+          # Clean temp files
+          Write-Host "Cleaning temp files..."
+          Remove-Item -Path "C:\Windows\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "C:\Users\*\AppData\Local\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
+          
+          # Clean package caches
+          Write-Host "Cleaning package caches..."
+          Remove-Item -Path "C:\ProgramData\Package Cache\*" -Recurse -Force -ErrorAction SilentlyContinue
+          
+          # Check final space
+          $finalSpace = (Get-PSDrive C).Free / 1GB
+          $gainedSpace = $finalSpace - $initialSpace
+          Write-Host "Final free space: $finalSpace GB"
+          Write-Host "Gained space: $gainedSpace GB"
+          
+          # echo ${{ secrets.DOCKER_TOKEN }} | docker login ghcr.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          # git clone https://github.com/getsentry/sentry-unreal.git
+          # wget "https://github.com/getsentry/sentry-unreal/releases/download/0.22.0/sentry-unreal-0.22.0-engine${{ matrix.unreal }}-github.zip" -OutFile "sentry.zip"
+          # Expand-Archive -Path "sentry.zip" -DestinationPath "sentry-unreal/sample/Plugins" -Force
+          # ls -al
           # docker run -td --name unreal ghcr.io/tustanivsky/ue-docker-test:${{ matrix.unreal }}
           # docker exec unreal cmd /C "C:\UnrealEngine\Engine\Build\BatchFiles\RunUAT.bat BuildCookRun -project=C:\UnrealEngine\sentry-unreal\sample\SentryPlayground.uproject -archivedirectory=C:\UnrealEngine\sentry-unreal\sample\Builds -platform=Win64 -nop4 -cook -build -stage -prereqss -package -archive"
           # docker exec unreal cmd /C "C:\UnrealEngine\Engine\Binaries\Win64\UE4Editor.exe" "C:\UnrealEngine\sentry-unreal\sample\SentryPlayground.uproject" -ReportExportPath="C:\UnrealEngine\sentry-unreal\sample\Saved\Automation" -ExecCmds="Automation RunTests Sentry;quit" -TestExit="Automation Test Queue Empty" -Unattended -NoPause -NoSplash -NullRHI

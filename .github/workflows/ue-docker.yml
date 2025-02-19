@@ -131,6 +131,25 @@ jobs:
               }
           }
 
+          # 5. Clean hostedtoolcache (keep only what's needed for builds)
+          Write-Host "Cleaning hostedtoolcache..."
+          $toolcachePath = "C:\hostedtoolcache"
+          if (Test-Path $toolcachePath) {
+              # Remove Python (except perhaps latest version)
+              $pythonPath = Join-Path $toolcachePath "Python"
+              if (Test-Path $pythonPath) {
+                  Get-ChildItem -Path $pythonPath -Directory | Select-Object -Skip 1 | ForEach-Object {
+                      Remove-Item -Path $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+                  }
+              }
+              
+              # Remove Go
+              Remove-Item -Path (Join-Path $toolcachePath "Go") -Recurse -Force -ErrorAction SilentlyContinue
+              
+              # Remove Ruby
+              Remove-Item -Path (Join-Path $toolcachePath "Ruby") -Recurse -Force -ErrorAction SilentlyContinue
+          }
+
           # Check if Docker is installed and prune unused components
           if (Get-Command "docker" -ErrorAction SilentlyContinue) {
             Write-Host "Pruning Docker system..."

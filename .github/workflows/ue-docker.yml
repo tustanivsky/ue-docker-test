@@ -17,7 +17,8 @@ jobs:
           
       - name: Docker config
         run: |
-          docker run --rm mcr.microsoft.com/powershell:nanoserver:1809 pwsh -Command "(Invoke-WebRequest -uri 'https://api64.ipify.org').Content"
+          # docker run --rm mcr.microsoft.com/powershell:nanoserver:1809 pwsh -Command "(Invoke-WebRequest -uri 'https://api64.ipify.org').Content"
+          docker run --rm mcr.microsoft.com/powershell pwsh -Command "(Invoke-WebRequest -uri 'https://api64.ipify.org').Content"
 
           
       # - name: Build Unreal Engine Docker image

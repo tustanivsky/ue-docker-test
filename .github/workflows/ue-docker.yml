@@ -17,10 +17,20 @@ jobs:
           
       - name: Docker config
         run: |
-          Resolve-DnsName google.com
-          ipconfig /all
-          route print
-          Invoke-WebRequest -Uri https://google.com -UseBasicParsing
+          Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters -Name IPEnableRouter -Value 1
+          # Stop Docker
+          net stop docker
+          # Remove NAT network
+          Get-VMSwitch "nat" | Remove-VMSwitch
+          docker network rm nat
+          # Recreate NAT network with proper subnet
+          docker network create --driver="nat" --subnet=172.28.208.0/20 nat
+          # Start Docker
+          net start docker
+          # Try HTTPS
+          Invoke-WebRequest -Uri https://8.8.8.8 -UseBasicParsing
+          # Or try a TCP connection
+          Test-NetConnection -ComputerName 8.8.8.8 -Port 443
           
       - name: Build Unreal Engine Docker image
         run: |

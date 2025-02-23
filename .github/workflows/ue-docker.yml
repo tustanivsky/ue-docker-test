@@ -17,6 +17,8 @@ jobs:
           
       - name: Docker config
         run: |
+          docker network ls
+          docker run mcr.microsoft.com/windows/nanoserver:1809 ping google.com
           Get-NetFirewallRule | Where-Object { $_.DisplayName -like "*Docker*" }
           Get-NetNat
           

@@ -17,12 +17,9 @@ jobs:
           
       - name: Docker config
         run: |
-          docker info
-          docker info | Select-String "DNS"
-          New-Item -Path "C:\ProgramData\docker\config" -ItemType Directory -Force
+          Get-Content "C:\ProgramData\docker\config\daemon.json"
           Set-Content -Path "C:\ProgramData\docker\config\daemon.json" -Value '{ "dns": ["8.8.8.8"] }'
           Restart-Service docker
-          docker info | Select-String "DNS"
           
       - name: Build Unreal Engine Docker image
         run: |

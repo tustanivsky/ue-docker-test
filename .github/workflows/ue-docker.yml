@@ -20,6 +20,7 @@ jobs:
           Get-Content "C:\ProgramData\docker\config\daemon.json"
           Set-Content -Path "C:\ProgramData\docker\config\daemon.json" -Value '{ "dns": ["8.8.8.8"] }'
           Restart-Service docker
+          Get-Content "C:\ProgramData\docker\config\daemon.json"
           
       - name: Build Unreal Engine Docker image
         run: |

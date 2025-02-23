@@ -14,7 +14,18 @@ jobs:
       - name: Install unreal-docker
         run: |
           pip install ue4-docker
+          
+      - name: Docker config
+        run: |
+          docker info
+          docker info | Select-String "DNS"
+          New-Item -Path "C:\ProgramData\docker\config" -ItemType Directory -Force
+          Set-Content -Path "C:\ProgramData\docker\config\daemon.json" -Value '{ "dns": ["8.8.8.8"] }'
+          Restart-Service docker
+          docker info | Select-String "DNS"
+          
       - name: Build Unreal Engine Docker image
         run: |
           ue4-docker setup
-          ue4-docker build -basetag ltsc2019 --target minimal --exclude debug --exclude templates --exclude ddc -isolation=process -username=${{ secrets.DOCKER_USERNAME }} -password=${{ secrets.DOCKER_TOKEN }} 4.27.2
+          ue4-docker diagnostics network
+          # ue4-docker build -basetag ltsc2019 --target minimal --exclude debug --exclude templates --exclude ddc -isolation=process -username=${{ secrets.DOCKER_USERNAME }} -password=${{ secrets.DOCKER_TOKEN }} 4.27.2

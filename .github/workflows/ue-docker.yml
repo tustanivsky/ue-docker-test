@@ -17,25 +17,10 @@ jobs:
           
       - name: Docker config
         run: |
-          Get-NetAdapter | Where-Object {$_.Status -eq "Up"}
-          Get-DnsClientServerAddress
-          nslookup google.com
-          # Temporarily disable Windows Firewall to test (be careful in production)
-          Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
-          ping google.com
-          # Don't forget to re-enable it after testing
-          Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
-          netsh winhttp show proxy
-          # --------
-          ping google.com
-          docker network ls
-          Get-NetNat
-          docker network inspect nat
-          docker run mcr.microsoft.com/windows/nanoserver:1809 ping google.com
-          # Remove existing NAT network
-          docker network rm nat
-          # Create new NAT network
-          docker network create --driver="nat" nat
+          Resolve-DnsName google.com
+          ipconfig /all
+          route print
+          Invoke-WebRequest -Uri https://google.com -UseBasicParsing
           
       - name: Build Unreal Engine Docker image
         run: |

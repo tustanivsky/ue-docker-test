@@ -4,7 +4,7 @@ on: push
 
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-latest
     steps:
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -17,6 +17,16 @@ jobs:
           
       - name: Docker config
         run: |
+          Get-NetAdapter | Where-Object {$_.Status -eq "Up"}
+          Get-DnsClientServerAddress
+          nslookup google.com
+          # Temporarily disable Windows Firewall to test (be careful in production)
+          Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+          ping google.com
+          # Don't forget to re-enable it after testing
+          Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True
+          netsh winhttp show proxy
+          # --------
           ping google.com
           docker network ls
           Get-NetNat

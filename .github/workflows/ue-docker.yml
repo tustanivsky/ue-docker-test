@@ -19,7 +19,7 @@ jobs:
         run: |
           docker network list
           docker image list
-          # docker run mcr.microsoft.com/windows/nanoserver ping google.com
+          docker run mcr.microsoft.com/windows/nanoserver:1809 ping google.com
           $config = @{
               "hosts" = @("npipe://")
               "dns"   = @("8.8.8.8")

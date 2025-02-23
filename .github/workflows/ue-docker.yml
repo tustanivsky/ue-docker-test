@@ -17,16 +17,8 @@ jobs:
           
       - name: Docker config
         run: |
-          docker network list
-          docker image list
-          docker run -dns 8.8.8.8 mcr.microsoft.com/windows/nanoserver:1809 ping google.com
-          $config = @{
-              "hosts" = @("npipe://")
-              "dns"   = @("8.8.8.8")
-          }
-          $config | ConvertTo-Json -Depth 10 | Set-Content "C:\ProgramData\docker\config\daemon.json"
-          Restart-Service docker
-          Get-Content "C:\ProgramData\docker\config\daemon.json"
+          Get-NetFirewallRule | Where-Object { $_.DisplayName -like "*Docker*" }
+          Get-NetNat
           
       - name: Build Unreal Engine Docker image
         run: |

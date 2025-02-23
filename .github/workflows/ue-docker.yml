@@ -18,7 +18,11 @@ jobs:
       - name: Docker config
         run: |
           Get-Content "C:\ProgramData\docker\config\daemon.json"
-          Set-Content -Path "C:\ProgramData\docker\config\daemon.json" -Value '{ "dns": ["8.8.8.8"] }'
+          $config = @{
+              "hosts" = @("npipe://")
+              "dns"   = @("8.8.8.8")
+          }
+          $config | ConvertTo-Json -Depth 10 | Set-Content "C:\ProgramData\docker\config\daemon.json"
           Restart-Service docker
           Get-Content "C:\ProgramData\docker\config\daemon.json"
           

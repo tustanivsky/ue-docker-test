@@ -17,7 +17,7 @@ jobs:
           
       - name: Docker config
         run: |
-          Get-Content "C:\ProgramData\docker\config\daemon.json"
+          docker run mcr.microsoft.com/windows/nanoserver ping google.com
           $config = @{
               "hosts" = @("npipe://")
               "dns"   = @("8.8.8.8")

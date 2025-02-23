@@ -17,20 +17,10 @@ jobs:
           
       - name: Docker config
         run: |
-          Start-Process powershell -Verb RunAs
-          Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters -Name IPEnableRouter -Value 1
-          # Stop Docker
-          net stop docker
-          # Remove NAT network
-          docker network rm nat
-          # Recreate NAT network with proper subnet
-          docker network create --driver="nat" --subnet=172.28.208.0/20 nat
-          # Start Docker
-          net start docker
-          # Try HTTPS
-          Invoke-WebRequest -Uri https://8.8.8.8 -UseBasicParsing
-          # Or try a TCP connection
-          Test-NetConnection -ComputerName 8.8.8.8 -Port 443
+          sudo Stop-Service docker
+          sudo Get-VMSwitch "nat" | Remove-VMSwitch -Force
+          sudo Start-Service docker
+          sudo docker network create --driver="nat" --subnet=172.28.208.0/20 nat
           
       # - name: Build Unreal Engine Docker image
       #   run: |

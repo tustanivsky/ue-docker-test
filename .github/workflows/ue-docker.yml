@@ -33,6 +33,12 @@ jobs:
         run: |
           docker build -t ghcr.io/${{ github.repository_owner }}/my-image:latest .
 
-      - name: Push Image to GHCR
-        run: |
-          docker push ghcr.io/${{ github.repository_owner }}/my-image:latest
+      # - name: Push Image to GHCR
+      #   run: |
+      #     docker push ghcr.io/${{ github.repository_owner }}/my-image:latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/my-image:latest
